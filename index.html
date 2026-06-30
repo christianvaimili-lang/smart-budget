@@ -1,1 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Smart Budget">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135706.png">
+<title>Smart Budget</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+margin:0;
+background:#f2f2f7;
+font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",Arial;
+}
+
+.app{
+padding:20px;
+max-width:420px;
+margin:auto;
+}
+
+h1{
+text-align:center;
+font-size:34px;
+}
+
+.subtitle{
+text-align:center;
+color:#777;
+}
+
+
+.card{
+
+background:white;
+border-radius:25px;
+padding:20px;
+margin:18px 0;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+}
+
+select{
+
+width:100%;
+padding:15px;
+font-size:18px;
+border-radius:15px;
+border:0;
+background:#eee;
+margin-bottom:12px;
+
+}
+input{
+
+width:100%;
+padding:15px;
+font-size:18px;
+border-radius:15px;
+border:0;
+background:#eee;
+
+}
+
+
+.row{
+
+display:flex;
+justify-content:space-between;
+padding:12px 0;
+border-bottom:1px solid #eee;
+
+}
+
+
+progress{
+
+width:100%;
+height:18px;
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+<h1>Smart Budget</h1>
+
+<p class="subtitle">
+Your personal finance dashboard
+</p>
+
+
+<div class="card">
+
+<h2>Available Balance</h2>
+
+<h1 id="balance">$0</h1>
+
+<p>After your budget split</p>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>Income</h2>
+
+<select id="period" onchange="calculate()">
+
+<option value="month">
+Monthly
+</option>
+
+<option value="week">
+Weekly
+</option>
+
+</select>
+
+
+<input id="income"
+type="number"
+placeholder="Enter pay"
+oninput="calculate()">
+
+</div>
+
+
+
+<div class="card">
+
+<h2>Total</h2>
+
+<h1 id="total">$0</h1>
+
+</div>
+
+
+
+
+<div class="card">
+
+<h2>Budget Split</h2>
+
+
+<div class="row">
+<span>Parents</span>
+<b id="parents">$0</b>
+</div>
+
+
+<div class="row">
+<span>Savings</span>
+<b id="savings">$0</b>
+</div>
+
+
+<div class="row">
+<span>Emergency</span>
+<b id="emergency">$0</b>
+</div>
+
+
+<div class="row">
+<span>Fuel</span>
+<b id="fuel">$0</b>
+</div>
+
+
+<div class="row">
+<span>Subscriptions/Gym</span>
+<b id="sub">$0</b>
+</div>
+
+
+<div class="row">
+<span>Food</span>
+<b id="food">$0</b>
+</div>
+
+
+<div class="row">
+<span>Spending</span>
+<b id="spending">$0</b>
+</div>
+
+
+</div>
+
+
+
+
+<div class="card">
+
+<h2>Goals</h2>
+
+
+<p>🚗 Car</p>
+<progress id="car" value="0" max="100"></progress>
+
+
+<p>✈️ Holiday</p>
+<progress id="holiday" value="0" max="100"></progress>
+
+
+<p>🏠 House</p>
+<progress id="house" value="0" max="100"></progress>
+
+
+</div>
+
+
+
+
+<div class="card">
+
+<h2>Chart</h2>
+
+<canvas id="chart"></canvas>
+
+</div>
+
+
+
+</div>
+
+
+
+<script>
+
+let myChart;
+
+
+function calculate(){
+
+
+let income = Number(
+document.getElementById("income").value
+);
+
+
+let period = document.getElementById("period").value;
+
+
+if(period === "week"){
+
+income = income / 4;
+
+}
+
+
+
+localStorage.setItem("income", income);
+
+
+
+document.getElementById("total").innerHTML =
+"$" + income.toFixed(2);
+
+
+
+document.getElementById("balance").innerHTML =
+"$" + (income * 0.10).toFixed(2);
+
+
+
+let data = [
+
+income * 0.15,
+income * 0.30,
+income * 0.20,
+income * 0.10,
+income * 0.05,
+income * 0.10,
+income * 0.10
+
+];
+
+
+
+document.getElementById("parents").innerHTML =
+"$" + data[0].toFixed(2);
+
+document.getElementById("savings").innerHTML =
+"$" + data[1].toFixed(2);
+
+document.getElementById("emergency").innerHTML =
+"$" + data[2].toFixed(2);
+
+document.getElementById("fuel").innerHTML =
+"$" + data[3].toFixed(2);
+
+document.getElementById("sub").innerHTML =
+"$" + data[4].toFixed(2);
+
+document.getElementById("food").innerHTML =
+"$" + data[5].toFixed(2);
+
+document.getElementById("spending").innerHTML =
+"$" + data[6].toFixed(2);
+
+
+
+document.getElementById("car").value =
+(data[1] / 25000) * 100;
+
+
+document.getElementById("holiday").value =
+(data[1] / 5000) * 100;
+
+
+document.getElementById("house").value =
+(data[1] / 100000) * 100;
+
+
+
+if(myChart){
+
+myChart.destroy();
+
+}
+
+
+
+myChart = new Chart(
+document.getElementById("chart"),
+{
+
+type:"doughnut",
+
+data:{
+
+labels:[
+"Parents",
+"Savings",
+"Emergency",
+"Fuel",
+"Subscriptions",
+"Food",
+"Spending"
+],
+
+datasets:[{
+
+data:data
+
+}]
+
+}
+
+}
+
+);
+
+
+}
+
+
+
+window.onload=function(){
+
+let old = localStorage.getItem("income");
+
+
+if(old){
+
+document.getElementById("income").value = old;
+
+calculate();
+
+}
+
+}
+
+
+</script>
+
+
+
+</body>
+</html>
 
